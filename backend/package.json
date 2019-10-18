@@ -4,21 +4,30 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "mocha",
-    "server": "nodemon server.js"
+    "test": "mocha", 
+    "start" : "node server", 
+    "server": "nodemon server"
   },
-  "author": "",
+  "author": "Dharmang Solanki",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
+    "config": "^3.2.3",
     "cookie-parser": "^1.4.3",
     "ejs": "^2.6.1",
     "express": "^4.17.1",
     "express-session": "^1.15.6",
     "express-validator": "^6.2.0",
+    "jsonwebtoken": "^8.5.1",
     "mocha": "^6.2.1",
-    "mysql": "^2.17.1",
-    "nodemon": "^1.19.2"
+    "mongodb": "^3.3.2",
+    "mongoose": "^5.7.5",
+    "mysql": "^2.17.1"
+  },
+  "devDependencies": {
+    "concurrently": "^5.0.0",
+    "nodemon": "^1.19.4"
   }
 }
