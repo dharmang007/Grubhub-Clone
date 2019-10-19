@@ -1,16 +1,20 @@
 /************* Import Statements ***************/
-var Customer = require('./controllers/customers');
-var Restaurant = require('./controllers/restuarants');
+var {Customer,Restaurant} = require('./routes/api/customers');
 var express = require('express');
-var bodyParser = require('body-parser');
+//var bodyParser = require('body-parser');
 var session = require('express-session');
 const connectToDataBase = require("./config/db");
 var cookieParser = require('cookie-parser');
-var { check, validationResult } = require('express-validator');
 /***********************************************/
+
+/************* Congigure Express app ******************/
 const port = process.env.PORT || 3001;
 var app = express();
-app.use(bodyParser.json());
+app.use(express.json(
+    {
+        extends:false
+    }));
+//app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -25,12 +29,25 @@ app.use(session({
     resave: false,
     saveUninitialized: true
   }));
-
+// Connect to database
 connectToDataBase();
+// Setting the routes
+app.use('/api/customers',require('./routes/api/customers'));
+app.use('/api/restaurants',require('./routes/api/restaurants'));
+app.use('/api/auth',require('./routes/api/auth'));
+app.use('/api/profile',require('./routes/api/profile'));
+app.use('/api/orders',require('./routes/api/orders'));
+/***********************************************/
+
+
+
+/****************API Calls*****************/
+
+
+/*
 app.get('/', (req,res)=>{
     res.end("Server is Working!!");
 })
-
 
 //Method to handle the login method
 app.post('/login',(req,res)=>{
@@ -60,6 +77,8 @@ app.get('/view-restaurants',(req,res)=>{
     })
 })
 
+*/
+
 
 app.listen(process.env.PORT||port, () =>{
     if(process.env.PORT){
@@ -70,6 +89,4 @@ app.listen(process.env.PORT||port, () =>{
     }
     
 })
-
-
 module.exports = app;

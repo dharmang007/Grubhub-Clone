@@ -24,7 +24,7 @@ export default class SignUpUser extends Component{
         
     }
     
-    UNSAFE_componentWillMount(){
+    componentDidMount(){
         this.setState({
             status: false
         })

@@ -5,9 +5,13 @@ const db = config.get('mongoURI');
 //const dbName = "grubhub";
 //const dbPort = "27017";
 //const url = "mongodb://localhost:"+dbPort;
+
+// NOTE: poolSize is for connection pooling
 const dbOptions = {
     useNewUrlParser : true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useCreateIndex:true,
+    poolSize:50
 };
 
 
