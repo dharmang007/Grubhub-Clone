@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Route} from 'react-router-dom';
+import {Switch,Route} from 'react-router-dom';
 import Login from './login';
 import Home from './Customers/home';
 import SignUpRestaurant from './Restaurants/signUpRestaurant';
@@ -15,8 +15,7 @@ class Main extends Component {
     render(){
         return(
                 <div>                
-                    <Route path="/" component={Default}/>
-                    <Route path="/login" component={Login}/>
+                    <Switch>
                     <Route path="/create-user" component={SignUpUser}/>
                     <Route path="/create-restaurant" component={SignUpRestaurant}/>
                     <Route path="/home" component={Home}/>
@@ -24,7 +23,9 @@ class Main extends Component {
                     <Route path="/home-restuarant" component={HomeRestaurant}/>
                     <Route path="/view-restaurants" component={ViewResturants}/>
                     <Route path="/see-orders" component={SeeOrders}/>
-
+                    <Route path="/login" component={Login}/>
+                    <Route path="/" component={Default}/>
+                    </Switch>
                 </div>
         )
     }

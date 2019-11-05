@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "../login.css";
-import GeneralNavbar from '../Customers/navbar';
+import RestaurantNavbar from '../Restaurants/RestaurantNavbar';
 import history from '../../history';
 export default class RestaurantProfile extends Component{    
         
@@ -25,7 +25,8 @@ export default class RestaurantProfile extends Component{
     
     componentDidMount(){
         let restaurantId = this.props.restaurantId;
-
+        // Make a get request to fetch restaurant details
+        
         this.setState({
             id:restaurantId
         })
@@ -66,15 +67,11 @@ export default class RestaurantProfile extends Component{
     }
       
     render(){    
-        console.log(this.props.children);
-        console.log(history.state);
-
         return (
             <div>
-                <GeneralNavbar/>
-                <h1>Restaurant Profile</h1>
-                
-            <div className = "SignUpUser">
+                <RestaurantNavbar/>
+                <h1>Restaurant Profile</h1>             
+            <div className = "Profile">
                 <div className="panel panel-default">
                     <div className="panel-body">
                     <h1> {this.state.id} </h1>

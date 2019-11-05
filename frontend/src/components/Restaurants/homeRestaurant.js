@@ -8,11 +8,10 @@ export default class HomeRestaurant extends Component{
     
     constructor(props){
         super(props)
-        this.state ={
+        this.state = {
             id : cookie.load("restaurantId"),
             view : (<SeeOrders/>)
         }
-        console.log(props);
     }
 
     SeeOrders(){
@@ -32,7 +31,7 @@ export default class HomeRestaurant extends Component{
                     <Button color="danger" onClick={this.CheckMenu()} block> Check Menu </Button>
                     Home Page for Restaurant
                     <div className="container" id="orders">
-                        <SeeOrders rest />
+                        <SeeOrders/>
                     </div>                   
                 </div>
         );

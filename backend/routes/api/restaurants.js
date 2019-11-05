@@ -5,15 +5,26 @@ const Restaurant = require('../../models/Restaurant');
 const bcrpyt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const multer = require('multer');
+const auth = require('../../middleware/auth');
 /*************************************************/ 
 
 const router = express.Router();
-var { check, validationResult } = require('express-validator');
+const storage = multer.diskStorage({
+    destination: (req,file,cb) => {
+        cb(null,'./static/images');
+    },
+    filename:(req,file,cb) => {
+        cb(null,file.originalname);
+    }
+});
+const upload = multer({storage:storage});
 
+var { check, validationResult } = require('express-validator');
 /**
  * @description This API will create a new Restaurant profile. In case if user enters the invalid details, we will send the 400 Bad Request along with the error messages
  */
-router.post('/create-restaurant',[
+router.post('/create-restaurant',upload.single('profileImg'),[
     check('name','Please Enter your Name').not().isEmpty(),
     check('email','Your email is valid. Please check the format of your email.').isEmail(),
     check('password','The length of the password must be 8 or more characters.').isLength({min:8}),
@@ -21,6 +32,7 @@ router.post('/create-restaurant',[
     check('contact','Please check the length of your contact number').isLength({min:10,max:10}),
     check('cuisine','Please enter the type of cuisine served at your restaurant').not().isEmpty()
     ],async (req,res)=>{
+        
        const err = validationResult(req);
        
        if(!err.isEmpty()){
@@ -31,14 +43,21 @@ router.post('/create-restaurant',[
        
        try{
             // Step 1 : De-Struct the request body 
-            const { email, name, password, contact, cuisine, profileImg } = req.body;
-
+            const { email, name, password, contact, cuisine} = req.body;
+            let profileImg = "";
             // Step 2 : check for duplicate user
             let restaurant = await Restaurant.findOne({email});
             if(restaurant){
                return res.status(400).json({errors:[{msg:'User already exist'}]})
             }
-            restaurant = new  Restaurant({name,email,password,contact,cuisine,profileImg});
+            if(req.file != null){
+                if(req.file.size > 5242880){
+                    return res.status(400).json({errors:[{msg:'The image size should be smaller than or equal to 5 MB.'}]});
+                }   
+                console.
+                profileImg = req.file.path1;
+            }
+            restaurant = new Restaurant({name,email,password,contact,cuisine,profileImg});
             
             // Step 3 : Encrpyt password
             const salt = await bcrpyt.genSalt(10);
@@ -75,93 +94,38 @@ router.post('/create-restaurant',[
  * Notice that we will only use sessionStorage variable if the customer is not logged in otherwise we will use the existing customer session
  */
 router.get('/view-restaurants',async (req,res)=>{
-    //try{
+    try{
         let restaurantList = await Restaurant.find({});
         res.json(restaurantList);
-    //}catch(err){
-    //    res.status(500).send(err);
-   // }
+    }catch(err){
+        res.status(500).send("Server Error from /view-restaurants"+err);
+    }
 });
 
 /**
- * @description Restaurant class contains all the Restaurant related methods
+ * @description This Api will get all the details of the user
+ * 
  */
-/*
-class Restaurant{
-
-    constructor(){
-
-    }
-
-    static getOrders(connection,req,res){
-        var query = `Select * From orders where idRestaurant= '${req.body.restaurant_id}'`;
+router.get('/:restId',auth, async(req,res)=>{
+    //try{
+        //console.log(req.params.customerId);
+        const restId = req.params.customerId;
+        let restaurant = await Restaurant.findById(restId);
         
-    }
-
-    static login(connection,req,res) {
-    
-        var query = `SELECT * FROM restaurants WHERE email = '${req.body.email}' AND password = '${req.body.password}';`;
-        connection.query(query,(err, rows) => {
-        if(err || rows == "" ){
-            res.json(err);
+        if(restaurant){
+            return res.json({restaurant});
         }
         else{
-            res.cookie("cookieRestaurant","cookieRestaurant",{maxAge: 900000, httpOnly: false});
-            req.session.user = rows;           
-            res.json(rows);  
-        }   
-    })
-    }
-
-    static signUp(connection,req,res){
-        var query = `INSERT INTO restaurants (email, restaurantName, password, contactNumber,restaurantZipCode,restaurantImgPath) VALUES (
-            '${req.body.email}', '${req.body.name}', '${req.body.password}', '${req.body.contactNumber}','${req.body.zipCode}','');`;
-
-        connection.query(query,(err, rows, fields) => {
-        if(!err){
-            var getRestaurantQuery = `SELECT * FROM restaurants WHERE email = '${req.body.email}'`;
-            let restaurantData = null;
-            console.log(rows.body);
-            connection.query(getRestaurantQuery,(err,rows,fields)=>{
-                restaurantData = rows;
-            })
-            
-            var restaurantTableName = req.body.name.toString().trim().toLowerCase();
-            console.log(restaurantTableName);
-            // Now create a table for the Restaurant
-            query = `CREATE TABLE '${restaurantTableName}' (
-                itemid INT NOT NULL AUTO_INCREMENT,
-                itemName VARCHAR(45) NULL,
-                itemDescription VARCHAR(255) NULL,
-                itemPrice INT NOT NULL,
-                itemImage VARCHAR(255) NULL,
-                PRIMARY KEY (itemid)); `;
-            connection.query(query,(err)=>{ 
-                if(err){
-                    res.json(err);
-                }
-                else{
-                    res.json(restaurantData);
-                }
-            })
-
+             return res.json({msg:"No Restuarant Found"});
         }
-
-        else{
-            res.json([err]);
-        }
-    });
-
-    }
-
-    static update(connection,restaurant){
-
-    }
-
-    static getrestaurant(connection,restaurant){
         
-    }
+    //}catch(err){
+        
+     //   res.status(500).send("Error with Server!" + JSON.stringify(err));
+   // }
 
-}
-*/
+
+});
+
+
 module.exports = router;

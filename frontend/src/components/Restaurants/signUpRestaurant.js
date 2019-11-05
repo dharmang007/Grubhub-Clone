@@ -4,10 +4,8 @@ import "../login.css";
 import {Redirect} from 'react-router';
 import axios from 'axios';
 import history from '../../history';
-import GeneralNavbar from '../Customers/navbar';
-import {Button, Form, FormGroup,Label, Input} from'reactstrap';
-
-
+import {Button, Form, FormText, FormGroup,Label, Input} from'reactstrap';
+import GeneralNavbar from "../navbar";
 export default class SignUpRestaurant extends Component{    
         
     constructor(props){
@@ -16,9 +14,10 @@ export default class SignUpRestaurant extends Component{
             name:"",
             email : "",
             password: "",
-            zipCode:"",
+            cuisine:"",
             status:false,
-            contantNumber:""
+            contantNumber:"",
+            profileImg:null
         }
 
         this.onNameChangeEvent = this.onNameChangeEvent.bind(this);
@@ -62,11 +61,17 @@ export default class SignUpRestaurant extends Component{
         
     }
     
-    onZipcodeChangeEvent = (e) =>{
+    onCusineChangeEvent = (e) =>{
         this.setState({
-            zipCode : e.target.value
+            cuisine : e.target.value
         })
         
+    }
+
+    onProfileImgChangeEvent = (e) => {
+        this.setState({
+            profileImg: e.target.files[0]
+        });
     }
 
     // Sign Up 
@@ -78,11 +83,11 @@ export default class SignUpRestaurant extends Component{
             email: this.state.email,
             password: this.state.password,
             name:this.state.name,
-            contactNumber:this.state.contantNumber,
-            zipCode : this.state.zipCode
-
+            contact:this.state.contantNumber,
+            cuisine : this.state.cuisine,
+            profileImg: this.state.profileImg
         }
-        axios.post('http://localhost:3001/create-restaurant',req)
+        axios.post('http://localhost:3001/api/restaurants/create-restaurant',req)
         .then(response => {
             if(response.status === 200 && response.data != ""){
                 
@@ -103,6 +108,7 @@ export default class SignUpRestaurant extends Component{
        
     }
 
+    
     render(){    
         let redirectVar = null, errorMsg=null;
         
@@ -137,8 +143,15 @@ export default class SignUpRestaurant extends Component{
                             <Input type="text" name="contactNumber" id="contantNumber" onChange={this.onContantChangeEvent} required/>
                         </FormGroup>
                         <FormGroup>
-                            <Label for="zipcode">Zip Code</Label>
-                            <Input type="text" name="zipcode" id="zipcode" onChange={this.onZipcodeChangeEvent} required/>
+                            <Label for="cuisine">Cuisine</Label>
+                            <Input type="text" name="cuisine" id="cuisine" onChange={this.onCusineChangeEvent} required/>
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="profileImg">Profile Image</Label>
+                            <Input type="file" name="profileImg" id="profileImg" onChange={this.onProfileImgChangeEvent} />
+                            <FormText color="muted">
+                                The file size should be less than 5MB.
+                            </FormText>
                         </FormGroup>
                         <FormGroup>                       
                             <Button color="danger" onClick={this.submitButtonEvent} block> Sign Up </Button>

@@ -1,7 +1,15 @@
+/**
+ * @author Dharmang Solanki
+ * 
+ */
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const userType = {
+    customer : "Customer",
+    restaurant: "Restaurant"
+}
 
-module.exports = (req,res,next) => {
+module.exports = function(req,res,next ){
     
     // get token
     const t = req.header('x-auth-token');
@@ -17,12 +25,17 @@ module.exports = (req,res,next) => {
         const decodedToken = jwt.verify(t,config.get('jwtSecretToken'));
         // Once we get this req.customer then we can use this customer in any of our 
         // protected routes
-        req.customer = decodedToken.customer;
+        if(req.body.userType == userType.customer){
+            req.customer = decodedToken.customer;
+        }
+        else{
+            req.restaurant = decodedToken.restaurant;
+        }
         next();
-
     }catch(err){
-        console.log(err);
+        console.err(err);
         res.status(401).json({error:'invalid token'});
     }
+    
 
 }

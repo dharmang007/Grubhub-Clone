@@ -1,28 +1,36 @@
+
+/* #region Import statements */
 import React, { Component } from "react";
-import "./login.css";
-import cookie from 'react-cookies';
-import GeneralNavbar from './Customers/navbar';
+import GeneralNavbar from './navbar';
 import {Redirect} from 'react-router';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
-import history from '../history';
+import "./login.css";
 import {Button, Form, FormGroup,Label, Input, Dropdown,
      DropdownMenu, DropdownItem, DropdownToggle } from'reactstrap';
      
 import { connect } from "react-redux";
 import actions from '../actions';
+
+/* #endregion */
+
 const userType = {customer:"Customer",restaurant:"Restaurant"}
+/**
+ * @description This login component will be used for both Customer and Restaurant
+ */
 class Login extends Component{    
-    constructor(props){
-        super(props);
+    
+    constructor(){
+        super();  
         this.state = {
             email : "",
             name : "",
             password: "",
             dropdownOpen: false,
             userType: userType.customer,
-            authFlag:false,
-            errorMsg :null
+            authToken:null,
+            errorMsg :null,
+            nextRedirect: null
         }
         this.onEmailChangeEvent = this.onEmailChangeEvent.bind(this);
         this.onPasswordChangeEvent = this.onPasswordChangeEvent.bind(this);
@@ -31,12 +39,15 @@ class Login extends Component{
         this.toggle = this.toggle.bind(this);
     }
 
-    UNSAFE_componentWillMount(){
+    componentWillMount(){
         this.setState({
-            authFlag:false,
+            authToken:null,
             userType: userType.customer
-        })
+        })   
     }
+
+
+    /* #region OnChange methods and Submit Method */
     onEmailChangeEvent = (e) =>{
         console.log(e.target.value);
         this.setState({
@@ -52,14 +63,11 @@ class Login extends Component{
         
     }
 
-    userTypeChangeEvent = (e) =>{
-        
+    userTypeChangeEvent = (e) =>{        
         this.setState({
             userType:  e.target.value
-        })
-        
+        })   
     }
-
     toggle() {
         
         this.setState(prevState => ({
@@ -73,87 +81,59 @@ class Login extends Component{
         //send the Get Request to Server 
         e.preventDefault();
         
-
-        if(this.state.email == "user@gmail.com" && this.state.password=="user1")
-        {
-            this.setState({
-                authFlag:true                
-            })   
-            let user = {
-                email:this.state.email,
-                password:this.state.password
-            };
-            this.props.userLoggedin(user);
-        }
-        else{
-            this.setState({
-                errorMsg:"Please check your credentials.",
-                authFlag:false
-            })
-        }
-        /*
         const req = {
             userType : this.state.userType,
             email: this.state.email,
             password: this.state.password
-        }
-        axios.post('http://localhost:3001/login',req)
-        .then(response => {
-            if(response.status === 200 && response.data != null){
-                console.log("responseData");
-                console.log(response.data[0]);
-                //localStorage.setItem(response.data)
-                if(this.state.userType == userType.customer){
-                    cookie.save('cookie', response.data[0].customer_id, { path: '/' });
-                    sessionStorage.setItem("email",response.data[0].email);
-                    sessionStorage.setItem("name",response.data[0].name);
-                    
-                }
-                else{
-                    cookie.save('restaurantId', response.data[0].restaurant_id, { path: '/' })
-                    sessionStorage.setItem("email",response.data[0].email);
-                    sessionStorage.setItem("name",response.data[0].name);
-                }
-                 
-                
-                
+        }     
+        axios.post('http://localhost:3001/api/auth',req)
+        .then(async response => {
+            console.log("Response Data ::"+JSON.stringify(response.data));
+            if(response.status == 200){
+     
+                await this.props.userLoginPass(response.data);
                 this.setState({
-                
-                    authFlag:true
-                })
-            }else{
-                
-                this.setState({
-                    errorMsg : "Invalid Credentials!",
-                    authFlag:false
-                })
-            }           
-        });*/   
-    }
 
+                    authToken:response.data.token
+                });
+            }
+            else{
+                this.setState({
+                    errorMsg:response.data
+                });
+            }           
+        });
+    }
+    /* #endregion */
+    
     render(){    
         
-        let signUpLink = null,redirectVar = null;
+        let signUpLink = null;
+    
         if(this.state.userType == userType.customer){
             signUpLink = <Link to='/create-user'>Not a user? Sign Up</Link>
         }
         else{
             signUpLink = <Link to='/create-restaurant'> Expand your Business! Sign Up</Link>
         }
-
-
-        if(this.state.authFlag){
+        
+        if(this.state.authToken != null){
             if(this.state.userType == userType.customer){
-                redirectVar = <Redirect to='/home'/>
+                this.setState({
+                    nextRedirect:<Redirect to='/home'/>
+                })
+                
             }
             else {
-                redirectVar = <Redirect to='/home-restuarant'/>
+                this.setState({
+                    nextRedirect:<Redirect to='/home-restuarant'/>
+                })
+                
             }
         }
-        console.log(this.state.errorMsg);
         return (
             <div>
-                {redirectVar}
+                {this.state.nextRedirect}
             <GeneralNavbar/>
             <div className = "Login">
                 <div className="panel panel-default">
@@ -193,15 +173,14 @@ class Login extends Component{
         )
     }
 }
-const stateToProps = (state) =>{
-    return {
-        //user: state.user
-    }
-}
-const dispatchToProps = (dispatch) =>{
-    return {
 
-        userLoggedin :  (user) =>dispatch(actions.userLoggedin(user))
+const dispatchToProps = dispatch => {
+    
+    return {
+        
+        userLoginPass :  (payload) =>dispatch(actions.userLoginPass(payload))
+        
     }
+
 }
-export default connect(stateToProps,dispatchToProps)(Login)
+export default connect(null,dispatchToProps)(Login)

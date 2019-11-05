@@ -1,28 +1,34 @@
 import React, { Component } from "react";
 import "../login.css";
-import GeneralNavbar from './navbar';
+import GeneralNavbar from '../navbar';
 import store from '../../stores/index';
-export default class Home extends Component{
+import setToken from '../../utils/setToken';
+import axios from "axios";
+import actions from '../../actions';
+     
+import { connect } from "react-redux";
+class Home extends Component{
 
 
     constructor(props){
         super(props)
         this.state={
             user: store.getState()
-        }
-        console.log("From Home Page");
-    }
-    componentDidMount(){
             
+        }
     }
+
+
     render(){
-        console.log("State : "+JSON.stringify(this.state.user.user.user.email));
+        
+        console.log("Store From Home Page:");
+        console.log(this.state.user.user);
         return(    
                 <div className="container">
 
                     <GeneralNavbar/>
-                    <h3>Welcome {this.state.user.user.user.email} </h3>      
-
+                    <h3>Welcome  </h3>      
+                    
                     <div className="row">
                         <div className="col-md-6"><p></p></div>
                         <div className="col-md-6"><p> </p></div>
@@ -49,3 +55,14 @@ export default class Home extends Component{
     }
 
 }
+const dispatchToProps = dispatch => {
+    
+    return {
+        
+        userLoad :  (payload) =>dispatch(actions.userLoad(payload))
+        
+    }
+
+}
+
+export default connect(null,dispatchToProps)(Home)

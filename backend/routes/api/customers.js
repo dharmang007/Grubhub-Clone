@@ -1,10 +1,16 @@
+/**
+ * @author Dharmang Solanki
+ * 
+ */
 'use strict';
 /***************Import Statements******************/
 const express = require('express');
 const Customer = require('../../models/Customer');
+const Orders = require('../../models/CustomerOrders');
 const bcrpyt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const auth = require('../../middleware/auth');
 /*************************************************/ 
 
 
@@ -22,8 +28,10 @@ router.post('/create-user',[
     check('contact','Please check the length of your contact number').isLength({min:10,max:10})
     ],async (req,res)=>{
        const err = validationResult(req);
-       
+       console.log("Create User Called!" + JSON.stringify(req.body));
        if(!err.isEmpty()){
+           console.log(err.array());
+           console.log("Error Found");
         return res.status(400).json({
             errors:err.array()
         });
@@ -31,10 +39,12 @@ router.post('/create-user',[
        
        try{
             // Step 1 : De-Struct the request body 
+            
             const { email, name, password, contact, profileImg } = req.body;
 
             // Step 2 : check for duplicate user
             let customer = await Customer.findOne({email});
+
             if(customer){
                return res.status(400).json({errors:[{msg:'User already exist'}]})
             }
@@ -56,7 +66,7 @@ router.post('/create-user',[
 
             jwt.sign(payload,config.get('jwtSecretToken'),
             {
-                expiresIn: 36000
+                expiresIn: 360000
             },
             (err,token) => {
                 if(err){
@@ -66,71 +76,56 @@ router.post('/create-user',[
             }); 
 
        }catch(err){
-            res.status(500).send(err);
+           console.error(err.message);
+          res.status(500).send(err);
        }
        
 });
 
+/**
+ * @description This Api will get all the details of the user
+ * 
+ */
+router.get('/:customerId',auth, async(req,res)=>{
+    try{
+        const customerId = req.params.customerId;
+        let customer = await Customer.findById(customerId);
+        if(customer){
+            return res.json({customer});
+        }
+        else{
+             return res.json({msg:"No Customer Found"});
+        }
+        
+    }catch(err){
+        
+        console.error(err.message);
+        res.status(500).send("Error with Server!");
+    }
+
+
+});
 
 
 
 /**
- * @description Customer class contains all the Customer related methods
+ * @description  This API will Query to get customer's orders 
  */
-/*
-class Customer{
-
-    constructor(){
-
-    }
-
-    static login(connection,req,res) {
-        var query = `SELECT * FROM customers WHERE email = '${req.body.email}' AND password = '${req.body.password}';`;
-        connection.query(query,(err, rows, fields) => {
-        if(err || rows == "" ){
-            res.json(err);
-        }
-        else{
-            res.cookie("cookieUser","cookieUser",{maxAge: 900000, httpOnly: false, path : '/'});
-            req.session.user = rows;           
-            res.json(rows);  
-        }   
-    })
-    }
-
-    static signUp(connection,req,res){    
-        var query = `INSERT INTO customers (email, name, password, contactNumber) VALUES (
-                    '${req.body.email}', '${req.body.name}', '${req.body.password}', '${req.body.contactNumber}');`;
-        connection.query(query,(err, rows, fields) => {
-            if(!err){
-                console.log(rows);
-                var getUserQuery = `SELECT * FROM customers WHERE email = '${req.body.email}'`;
-                let userData = null;
-                connection.query(getUserQuery,(err,rows,fields)=>{
-                    userData = rows;
-                })
-                res.json(userData);
-            }
-            else{
-            res.json(err);
-            }
-        });
-    }
-
-    static update(connection,user){
+router.get('/:customerId/orders',async (req,res)=>{
+    try{
+        const customerId = req.params.customerId;
+        const orders = await Orders.findOne({customerId});
+        if(orders){
+            return res.json({orders});
+         }
+         else{
+             return res.json({msg:"No Orders Found"});
+         }
         
+    }catch(err){
+        console.error(err.message);
+        res.status(500).send("Sever Error !");
     }
-
-    static getUser(connection,user){
-
-    }
-
-    static getAllUsers(){
-        
-    }
-
-}
-
-*/
+});
 
 module.exports = router;

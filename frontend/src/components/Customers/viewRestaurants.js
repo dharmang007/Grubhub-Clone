@@ -3,31 +3,35 @@ import "./viewRestaurants.css";
 import {Redirect} from 'react-router';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
+import GeneralNavbar from '../navbar';
 import DefaultValues from '../../constants/defaultValues';
 import {
-    Card, Button, CardImg, CardTitle, CardText, CardDeck,
+    Container, Card, Button, CardImg, CardTitle, CardText, CardDeck,
     CardSubtitle, CardBody, Pagination, PaginationItem, PaginationLink
 } from 'reactstrap';
 export default class ViewRestaurants extends Component{
     
-    constructor(props){
-        super(props)
+    constructor(){
+        
+        super()
         this.state = {
             restaurants : [],
-            currentPage:0
+            currentPage:0,
+            nextRestaurantId:null
         }
         this.pageSize = 2;
         this.pagesCount = 5;
 
-    }
-    
+    }    
     componentDidMount(){
 
         axios.get('http://localhost:3001/api/restaurants/view-restaurants')
                 .then((response) => {
                 //update the state with the response data
+                console.log(response.data);
                 this.setState({
-                    restaurants : response.data 
+                    restaurants : response.data,
+                    nextRestaurantId:null 
                 });
                 console.log(this.state.restaurants); 
             });
@@ -50,23 +54,29 @@ export default class ViewRestaurants extends Component{
     }
 
     restaurantPage = (restuarantId) =>{
-
+      this.setState({
+        nextRestaurantId: restuarantId 
+      });
     }
     render(){        
+
+        var selectedRestaurant = null;
+        if(this.state.nextRestaurantId != null){
+          selectedRestaurant = <Redirect to='/restaurantProfile'/>
+        }      
         const { currentPage } = this.state;
         let allRestaurants = [...this.state.restaurants];
         allRestaurants = allRestaurants.slice(currentPage * this.pageSize,(currentPage + 1) * this.pageSize);
-
         allRestaurants = allRestaurants.map((i,j) =>{
             return(  
                 <div className="data-slice" key={j} >
-                    <Card>
+                    <Card className="RestaurantCard">
                         <CardImg top width="100%" alt="Card image cap" />
                         <CardBody>
                             <CardTitle>{i.name}</CardTitle>
                             <CardSubtitle>Contant Number: {i.contact}</CardSubtitle>
                             <CardText>{i.desc}</CardText>
-                            <Button onClick={this.restaurantPage(i.id)}>See Menu</Button>
+                            <Button>See Menu</Button>
                         </CardBody>
                     </Card>
                 </div> 
@@ -76,14 +86,12 @@ export default class ViewRestaurants extends Component{
         return(    
         
         <div className="ViewRestaurants">
+            {}
             <div>
                 <h3>Restaurants</h3>
-            </div>
-            
-            
+            </div>   
         <div className="pagination-wrapper">
         {allRestaurants}
-            
           <Pagination aria-label="Page navigation example">
             
             <PaginationItem disabled={currentPage <= 0}>

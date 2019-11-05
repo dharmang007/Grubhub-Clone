@@ -1,12 +1,28 @@
-import UserActionConstants from '../constants/actionTypes';
+import {UserActionConstants} from '../constants/actionTypes';
 
 export default{
     
-    userLoggedin: (user) => {
-        console.log("Action Called!");
+    userLoginPass: (payload) => {
         return {
-            type : UserActionConstants.USER_LOGGEDIN,
-            data : user   
+            type : UserActionConstants.USER_LOGIN_PASS,
+            payload : payload    
+        }
+    },
+    userLoginFail: () =>{
+        return{
+            type : UserActionConstants.USER_LOGIN_FAIL
+        }
+    },
+
+    userLoad: () => {
+        return {
+            type: UserActionConstants.USER_LOAD
+        }
+    },
+
+    authError: () =>{
+        return {
+            type: UserActionConstants.USER_AUTH_FAIL
         }
     }
    

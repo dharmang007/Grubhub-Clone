@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import "../login.css";
+import GeneralNavbar from '../navbar';
 import {Redirect} from 'react-router';
 import axios from 'axios';
 import history from '../../history';
@@ -14,12 +15,14 @@ export default class SignUpUser extends Component{
             email : "",
             password: "",
             contactNumber :"",
+            profileImg:"",
             status:false
         }
         this.onNameChangeEvent = this.onNameChangeEvent.bind(this);
         this.onEmailChangeEvent = this.onEmailChangeEvent.bind(this);
         this.onPasswordChangeEvent = this.onPasswordChangeEvent.bind(this);
-        this.onContactChangeEvent = this.onContantChangeEvent.bind(this);
+        this.onContactChangeEvent = this.onContactChangeEvent.bind(this);
+        this.onProfileImgChangeEvent = this.onProfileImgChangeEvent.bind(this);
         this.submitButtonEvent = this.submitButtonEvent.bind(this);
         
     }
@@ -36,9 +39,9 @@ export default class SignUpUser extends Component{
         })
         
     }
-    onContantChangeEvent = (e) =>{
+    onContactChangeEvent = (e) =>{
         this.setState({
-            contantNumber : e.target.value
+            contactNumber : e.target.value
         })
         
     }
@@ -52,10 +55,15 @@ export default class SignUpUser extends Component{
     onPasswordChangeEvent = (e) =>{
         this.setState({
             password : e.target.value
-        })
+        });
         
     }
 
+    onProfileImgChangeEvent= (e) => {
+        this.setState({
+            profileImg : e.target.files[0]
+        });
+    }
     
     submitButtonEvent = (e) => {
         //send the Get Request to Server 
@@ -64,10 +72,11 @@ export default class SignUpUser extends Component{
             name:this.state.name,
             email: this.state.email,
             password: this.state.password,
-            contactNumber: this.state.contactNumber
-
+            contact: this.state.contactNumber,
+            //TODO : Add profile image for user
+            profileImg:this.state.profileImg
         }
-        axios.post('http://localhost:3001/create-user',req)
+        axios.post('http://localhost:3001/api/customers/create-user',req)
         .then(response => {
             console.log(response);
             if(response.status === 200 && response.data != ""){
@@ -75,17 +84,16 @@ export default class SignUpUser extends Component{
                 this.setState({
                     status: true
                 })
-                console.log("Response Data "+response.data);
-                history.push('/home',response.data);
-                console.log(history);
+                
+
             }else{
                 
-                console.log("error")
                 this.setState({
                     status:false
                 })
                 
             }
+            console.log("Response Data "+response.data);
         });
 
        
@@ -115,8 +123,8 @@ export default class SignUpUser extends Component{
                             <Input type="text" name="name" id="name" onChange={this.onNameChangeEvent} required/>
                         </FormGroup>
                         <FormGroup>
-                            <Label for="contantNumber">Contact Number</Label>
-                            <Input type="text" name="contactNumber" id="contantNumber" onChange={this.onContantChangeEvent} required/>
+                            <Label for="contactNumber">Contact Number</Label>
+                            <Input type="text" name="contactNumber" id="contactNumber" onChange={this.onContactChangeEvent} required/>
                         </FormGroup>
                         <FormGroup>
                             <Label for="email">Email</Label>
@@ -125,6 +133,10 @@ export default class SignUpUser extends Component{
                         <FormGroup>
                             <Label for="password">Password</Label>
                             <Input type="password" name="password" id="password" onChange={this.onPasswordChangeEvent} required />
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="profileImg">File Upload</Label>
+                            <Input type="file" name="profileImg" onChange= {this.onProfileImgChangeEvent} />
                         </FormGroup>
                         <FormGroup>                       
                             <Button color="danger" onClick={this.submitButtonEvent} block> Login </Button>

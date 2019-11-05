@@ -1,3 +1,8 @@
+/**
+ * @author Dharmang Solanki
+ * 
+ */
+
 const mongoose = require('mongoose');
 
 /**
@@ -5,7 +10,8 @@ const mongoose = require('mongoose');
  *  
  * */
 const CustomerSchema = new mongoose.Schema({
-    
+
+ 
   email:{
     type: String,
     required: true,
@@ -31,4 +37,4 @@ const CustomerSchema = new mongoose.Schema({
 //Here the mongoose.model has two arguments 
 // 1) the name of model 
 // 2) the Schema which will be used 
-module.exports = Customer = mongoose.model('customer',CustomerSchema);
+module.exports = Customer = mongoose.model('customer',CustomerSchema);;

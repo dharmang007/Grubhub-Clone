@@ -1,13 +1,19 @@
-/************* Import Statements ***************/
-var {Customer,Restaurant} = require('./routes/api/customers');
+/**
+ * @author Dharmang Solanki
+ * 
+ */
+
+/*#region Import Statements */
+
 var express = require('express');
 //var bodyParser = require('body-parser');
 var session = require('express-session');
 const connectToDataBase = require("./config/db");
 var cookieParser = require('cookie-parser');
-/***********************************************/
 
-/************* Congigure Express app ******************/
+/* #endregion*/
+
+/*#region Congigure Express app */
 const port = process.env.PORT || 3001;
 var app = express();
 app.use(express.json(
@@ -15,20 +21,21 @@ app.use(express.json(
         extends:false
     }));
 //app.use(bodyParser.json());
-app.use(cookieParser());
+
+
 app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
-    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers,X-Access-Token,XKey,Authorization');
     next();
 })
+/*
 app.use(session({
     secret: 'Nothing',
     resave: false,
     saveUninitialized: true
-  }));
+  }));*/
 // Connect to database
 connectToDataBase();
 // Setting the routes
@@ -37,48 +44,7 @@ app.use('/api/restaurants',require('./routes/api/restaurants'));
 app.use('/api/auth',require('./routes/api/auth'));
 app.use('/api/profile',require('./routes/api/profile'));
 app.use('/api/orders',require('./routes/api/orders'));
-/***********************************************/
-
-
-
-/****************API Calls*****************/
-
-
-/*
-app.get('/', (req,res)=>{
-    res.end("Server is Working!!");
-})
-
-//Method to handle the login method
-app.post('/login',(req,res)=>{
-    
-    if(req.body.userType === "Customer"){
-        Customer.default.login(connection,req,res);        
-    }
-    else {
-        Restaurant.default.login(connection,req,res);
-    }
-    
-})
-
-app.get('/home',(req,res)=>{
-    res.end();
-})
-
-//This method adds new users in the database
-app.post('/create-user',(req,res)=>Customer.default.signUp(connection,req,res))
-app.post('/create-restaurant',(req,res)=>Restaurant.default.signUp(connection,req,res))
-app.get('/view-restaurants',(req,res)=>{ 
-    var getRestaurants = `SELECT * FROM restaurants;`;
-    connection.query(getRestaurants,(err,rows,fields)=>{  
-        if(!err){
-            res.json(JSON.parse(JSON.stringify(rows)));
-        }
-    })
-})
-
-*/
-
+/*#endregion*/
 
 app.listen(process.env.PORT||port, () =>{
     if(process.env.PORT){
