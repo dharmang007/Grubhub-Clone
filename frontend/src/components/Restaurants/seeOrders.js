@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import {Table} from 'reactstrap';
 import axios from 'axios';
 import "../login.css"
+import defaultValues from "../../constants/defaultValues";
 
 
 export default class SeeOrders extends Component{
@@ -15,7 +16,7 @@ export default class SeeOrders extends Component{
     }
 
     componentWillMount(){
-        axios.get('http://localhost:3001/api/restaurants/orders')
+        axios.get(defaultValues.serverURI+'/api/restaurants/orders')
         .then((response) => {
         //update the state with the response data
         this.setState({

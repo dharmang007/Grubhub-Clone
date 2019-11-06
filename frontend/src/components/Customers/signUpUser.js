@@ -1,23 +1,28 @@
 import React, { Component } from "react";
-import "../login.css";
+import "./SignUp.css";
 import GeneralNavbar from '../navbar';
 import {Redirect} from 'react-router';
 import axios from 'axios';
-import history from '../../history';
-import {Button, Form, FormGroup,Label, Input } from'reactstrap';
+import { connect } from "react-redux";
+import actions from '../../actions';
+import {Button, Form,FormText, FormGroup,Label, Input } from'reactstrap';
+import defaultValues from "../../constants/defaultValues";
      
-export default class SignUpUser extends Component{    
+class SignUpUser extends Component{    
         
     constructor(props){
         super(props);
+        
         this.state = {
             name :"",
             email : "",
             password: "",
             contactNumber :"",
             profileImg:"",
-            status:false
+            errorMsg:null,
+            authToken:null,
         }
+        
         this.onNameChangeEvent = this.onNameChangeEvent.bind(this);
         this.onEmailChangeEvent = this.onEmailChangeEvent.bind(this);
         this.onPasswordChangeEvent = this.onPasswordChangeEvent.bind(this);
@@ -29,7 +34,7 @@ export default class SignUpUser extends Component{
     
     componentDidMount(){
         this.setState({
-            status: false
+            authToken:null
         })
     }
 
@@ -68,52 +73,64 @@ export default class SignUpUser extends Component{
     submitButtonEvent = (e) => {
         //send the Get Request to Server 
         e.preventDefault();
+        const formData = new FormData();
+        formData.append('name',this.state.name);
+        formData.append('email',this.state.email);
+        formData.append('password',this.state.password);
+        formData.append('contact',this.state.contactNumber);
+        formData.append('profileImg',this.state.profileImg);
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
+        };
+        /*
         const req = {
             name:this.state.name,
             email: this.state.email,
             password: this.state.password,
             contact: this.state.contactNumber,
-            //TODO : Add profile image for user
             profileImg:this.state.profileImg
         }
-        axios.post('http://localhost:3001/api/customers/create-user',req)
-        .then(response => {
-            console.log(response);
-            if(response.status === 200 && response.data != ""){
-                
+        */
+        axios.post(defaultValues.serverURI+'/api/customers/create-user',formData)
+        .then(async response => {
+            if(response.status === 200){
+                await this.props.userRegisteredPass(response.data);
                 this.setState({
-                    status: true
-                })
-                
-
-            }else{
-                
-                this.setState({
-                    status:false
-                })
-                
+                    authToken: response.data.token,
+                    errorMsg:null
+                }); 
             }
-            console.log("Response Data "+response.data);
+        }).catch(err=>{
+            //let fullError = err.response.data.errors.join(",");
+            console.log(err);
+            this.setState({
+                authToken : null,
+                errorMsg: JSON.stringify(JSON.stringify(err.response))
+            });
         });
 
        
     }
       
     render(){    
-        let errorMsg=null;
-        let redirectVar = null;
-        if(this.state.status){
-
-            redirectVar = <Redirect to="/home"/>
-            errorMsg = "";
+        let errorMsg =null;
+        let nextRedirect = null;
+        
+        if(this.state.authToken){
+            
+            nextRedirect = <Redirect to="/home"/>
         }
         else{
-            errorMsg = "You are already registered! Please use the login page";
+            errorMsg = <p>{this.state.errorMsg}</p>;
+            
         }
         return (
             <div>
-                {redirectVar}
-            <div id = "SignUpSigIn">
+                {nextRedirect}
+                <GeneralNavbar/>
+            <div id = "SignUp">
                 <div className="panel panel-default">
                     <div className="panel-body">
                     <h1> Sign Up User </h1>
@@ -135,8 +152,11 @@ export default class SignUpUser extends Component{
                             <Input type="password" name="password" id="password" onChange={this.onPasswordChangeEvent} required />
                         </FormGroup>
                         <FormGroup>
-                            <Label for="profileImg">File Upload</Label>
-                            <Input type="file" name="profileImg" onChange= {this.onProfileImgChangeEvent} />
+                            <Label for="profileImg">Profile Image</Label>
+                            <Input type="file" name="profileImg" id="profileImg" onChange={this.onProfileImgChangeEvent} />
+                            <FormText color="muted">
+                                The file size should be less than 5MB.
+                            </FormText>
                         </FormGroup>
                         <FormGroup>                       
                             <Button color="danger" onClick={this.submitButtonEvent} block> Login </Button>
@@ -150,3 +170,13 @@ export default class SignUpUser extends Component{
         )
     }
 }
+const dispatchToProps = dispatch => {
+    
+    return {
+        
+        userRegisteredPass :  (payload) =>dispatch(actions.userLoginPass(payload))
+        
+    }
+
+}
+export default connect(null,dispatchToProps)(SignUpUser)

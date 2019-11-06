@@ -1,23 +1,26 @@
 import React, { Component } from "react";
 import "../login.css";
-
 import {Redirect} from 'react-router';
 import axios from 'axios';
-import history from '../../history';
 import {Button, Form, FormText, FormGroup,Label, Input} from'reactstrap';
 import GeneralNavbar from "../navbar";
-export default class SignUpRestaurant extends Component{    
+import actions from "../../actions";
+import {connect} from "react-redux";
+import defaultValues from "../../constants/defaultValues";
+class SignUpRestaurant extends Component{    
         
     constructor(props){
         super(props);
         this.state = {
             name:"",
+            owner:"",
             email : "",
             password: "",
             cuisine:"",
-            status:false,
             contantNumber:"",
-            profileImg:null
+            profileImg:null,
+            authToken:null,
+            errorMsg:null
         }
 
         this.onNameChangeEvent = this.onNameChangeEvent.bind(this);
@@ -27,7 +30,7 @@ export default class SignUpRestaurant extends Component{
         this.onContactChangeEvent = this.onContantChangeEvent.bind(this);
     }
 
-    UNSAFE_componentWillMount(){
+    componentDidMount(){
         this.setState({
             status: false
         })
@@ -36,6 +39,13 @@ export default class SignUpRestaurant extends Component{
     onNameChangeEvent = (e) =>{
         this.setState({
             name : e.target.value
+        })
+        
+    }
+
+    onOwnerChangeEvent = (e) =>{
+        this.setState({
+            owner : e.target.value
         })
         
     }
@@ -78,49 +88,53 @@ export default class SignUpRestaurant extends Component{
     submitButtonEvent = (e) => {
         //send the Get Request to Server 
         e.preventDefault();
-        const req = {
-            userType : this.state.userType,
-            email: this.state.email,
-            password: this.state.password,
-            name:this.state.name,
-            contact:this.state.contantNumber,
-            cuisine : this.state.cuisine,
-            profileImg: this.state.profileImg
-        }
-        axios.post('http://localhost:3001/api/restaurants/create-restaurant',req)
-        .then(response => {
-            if(response.status === 200 && response.data != ""){
-                
-                this.setState({
-                    status : true
-                })
-                console.log("Response Data "+response.data);
-                history.push('/home-restaurant',response.data);
-                console.log(history);
-            }else{
-                this.setState({
-                    status : false
-                })
-                
+        const formData = new FormData();
+        formData.append('name',this.state.name);
+        formData.append('owner',this.state.owner);
+        formData.append('email',this.state.email);
+        formData.append('password',this.state.password);
+        formData.append('contact',this.state.contactNumber);
+        formData.append('cuisine',this.state.cuisine);
+        formData.append('profileImg',this.state.profileImg);
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
             }
+        };
+        
+        axios.post(defaultValues.serverURI+'/api/restaurants/create-restaurant',formData,config)
+        .then(async response => {
+            if(response.status === 200){
+                await this.props.userRegisteredPass(response.data);
+                this.setState({
+                    authToken: response.data.token,
+                    errorMsg : null
+                });
+            }
+        }).catch(err => {
+            this.setState({
+                authToken : null,
+                errorMsg: "Server Error!"
+            });
         });
-
-       
     }
 
     
     render(){    
-        let redirectVar = null, errorMsg=null;
+        let nextRedirect = null, errorMsg=null;
         
-        if(this.state.status){
-            redirectVar = <Redirect to="/home-restuarant" />
+        if(this.state.authToken){
+            nextRedirect = <Redirect to="/home-restuarant" />
         } 
+        else{
+            errorMsg = <p>{this.state.errorMsg}</p>;
+        }
         
         return (
             <div>
-                {redirectVar}
+                {nextRedirect}
                 <GeneralNavbar/>
-            <div id="SignInSignUp">
+            <div id="SignUp">
                 <div className="panel panel-default">
                     <div className="panel-body">
                     <h1> Restaurant SignUp </h1>
@@ -129,6 +143,10 @@ export default class SignUpRestaurant extends Component{
                         <FormGroup>
                             <Label for="name">Name</Label>
                             <Input type="text" name="name" id="name" onChange={this.onNameChangeEvent} required/>
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="owner">Owner</Label>
+                            <Input type="text" name="owner" id="owner" onChange={this.onOwnerChangeEvent} required/>
                         </FormGroup>
                         <FormGroup>
                             <Label for="email">Email</Label>
@@ -165,3 +183,13 @@ export default class SignUpRestaurant extends Component{
         )
     }
 }
+const dispatchToProps = dispatch => {
+    
+    return {
+        
+        userRegisteredPass :  (payload) =>dispatch(actions.userLoginPass(payload))
+        
+    }
+
+}
+export default connect(null,dispatchToProps)(SignUpRestaurant)

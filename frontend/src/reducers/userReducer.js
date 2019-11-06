@@ -8,12 +8,14 @@ var initialState = {
     user:null
 }
 export default (state=initialState, action) => {
-   
-    
+
     switch(action.type){
         case UserActionConstants.USER_LOGIN_PASS:
+            console.log("From Reducer"); 
+            
             localStorage.setItem('token',action.payload.token);
-            console.log("From User Reducer:: "+JSON.stringify(action.payload.user));
+            localStorage.setItem('userId',action.payload.user._id);
+            localStorage.setItem('email',action.payload.user.email);
             return {
                 ...state,
                 ...action.payload,
@@ -23,8 +25,10 @@ export default (state=initialState, action) => {
             }
         case UserActionConstants.USER_LOGIN_FAIL:
         case UserActionConstants.USER_AUTH_FAIL:
+        case UserActionConstants.USER_LOGOUT:
             localStorage.removeItem('token');
-            console.log("From User Reducer : Login Failed");
+            localStorage.removeItem('userId');
+            localStorage.removeItem('email');
             return{
                 ...state,
                 token: null,
@@ -43,19 +47,4 @@ export default (state=initialState, action) => {
             
     }
     
-
-
 }
-/*
-export default class UserReducer{
-    
-    static userReducer=(state=initialState,action)=>{
-        let newState = Object.assign({},state); // Creating a complete new state
-        
-        switch(action.type){
-            case UserActionConstants.USER_LOGGEDIN: 
-            newState['user'] = action.data
-        }
-    }
-   
-}*/

@@ -7,29 +7,14 @@ export default class RestaurantProfile extends Component{
     constructor(props){
         super(props);
         this.state = {
-            id :"",
-            name : "",
-            email : "",
-            password: "",
-            contactNumber :"",
-            status:false
+                
         }
         
-        this.onNameChangeEvent = this.onNameChangeEvent.bind(this);
-        this.onEmailChangeEvent = this.onEmailChangeEvent.bind(this);
-        this.onPasswordChangeEvent = this.onPasswordChangeEvent.bind(this);
-        this.onContactChangeEvent = this.onContantChangeEvent.bind(this);
-        this.submitButtonEvent = this.submitButtonEvent.bind(this);
         
     }
     
     componentDidMount(){
-        let restaurantId = this.props.restaurantId;
-        // Make a get request to fetch restaurant details
-        
-        this.setState({
-            id:restaurantId
-        })
+       
     }
 
     

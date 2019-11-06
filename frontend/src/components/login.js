@@ -1,7 +1,7 @@
 
 /* #region Import statements */
 import React, { Component } from "react";
-import GeneralNavbar from './navbar';
+import GeneralNavbar from '../components/navbar';
 import {Redirect} from 'react-router';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import {Button, Form, FormGroup,Label, Input, Dropdown,
      
 import { connect } from "react-redux";
 import actions from '../actions';
+import defaultValues from '../constants/defaultValues';
 
 /* #endregion */
 
@@ -29,8 +30,7 @@ class Login extends Component{
             dropdownOpen: false,
             userType: userType.customer,
             authToken:null,
-            errorMsg :null,
-            nextRedirect: null
+            errorMsg :null
         }
         this.onEmailChangeEvent = this.onEmailChangeEvent.bind(this);
         this.onPasswordChangeEvent = this.onPasswordChangeEvent.bind(this);
@@ -39,7 +39,7 @@ class Login extends Component{
         this.toggle = this.toggle.bind(this);
     }
 
-    componentWillMount(){
+    componentDidMount(){
         this.setState({
             authToken:null,
             userType: userType.customer
@@ -49,7 +49,7 @@ class Login extends Component{
 
     /* #region OnChange methods and Submit Method */
     onEmailChangeEvent = (e) =>{
-        console.log(e.target.value);
+        
         this.setState({
             email : e.target.value
         })
@@ -69,11 +69,9 @@ class Login extends Component{
         })   
     }
     toggle() {
-        
         this.setState(prevState => ({
           dropdownOpen: !prevState.dropdownOpen
         }));
-      
     }
      
     // Login 
@@ -86,54 +84,57 @@ class Login extends Component{
             email: this.state.email,
             password: this.state.password
         }     
-        axios.post('http://localhost:3001/api/auth',req)
+        
+        axios.post(defaultValues.serverURI+'/api/auth/login',req)
         .then(async response => {
-            console.log("Response Data ::"+JSON.stringify(response.data));
-            if(response.status == 200){
-     
+            
+            if(response.status === 200){
+                
                 await this.props.userLoginPass(response.data);
                 this.setState({
-
                     authToken:response.data.token
                 });
             }
-            else{
-                this.setState({
-                    errorMsg:response.data
-                });
-            }           
-        });
-    }
+            
+        }).catch( err=> {  
+            //let fullError = err.response.data.errors.join(",");
+            this.setState({
+                authToken : null,
+                errorMsg: "Incorrect Credential"
+            });
+        });    
+}
     /* #endregion */
     
     render(){    
         
         let signUpLink = null;
-    
+        let errorMsg = null;
+        let nextRedirect = null;
         if(this.state.userType == userType.customer){
             signUpLink = <Link to='/create-user'>Not a user? Sign Up</Link>
         }
         else{
             signUpLink = <Link to='/create-restaurant'> Expand your Business! Sign Up</Link>
         }
-        
-        if(this.state.authToken != null){
+
+        if(this.state.authToken){
+            
             if(this.state.userType == userType.customer){
-                this.setState({
-                    nextRedirect:<Redirect to='/home'/>
-                })
-                
+                nextRedirect = (<Redirect to='/home'/>);    
             }
             else {
-                this.setState({
-                    nextRedirect:<Redirect to='/home-restuarant'/>
-                })
-                
+                nextRedirect = (<Redirect to='/home-restaurant' />);
             }
         }
+        else{
+            errorMsg = <p>{this.state.errorMsg}</p>;
+            
+        }
+
         return (
             <div>
-                {this.state.nextRedirect}
+                {nextRedirect}
             <GeneralNavbar/>
             <div className = "Login">
                 <div className="panel panel-default">
@@ -164,7 +165,7 @@ class Login extends Component{
                         <FormGroup>                       
                             {signUpLink}
                         </FormGroup>
-                        {this.state.errorMsg}
+                        {errorMsg}
                     </Form>
                     </div>
                 </div>            
@@ -177,9 +178,8 @@ class Login extends Component{
 const dispatchToProps = dispatch => {
     
     return {
-        
+
         userLoginPass :  (payload) =>dispatch(actions.userLoginPass(payload))
-        
     }
 
 }

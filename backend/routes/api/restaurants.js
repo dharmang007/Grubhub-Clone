@@ -6,19 +6,41 @@ const bcrpyt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 const multer = require('multer');
+const path = require('path');
 const auth = require('../../middleware/auth');
 /*************************************************/ 
 
 const router = express.Router();
 const storage = multer.diskStorage({
     destination: (req,file,cb) => {
-        cb(null,'./static/images');
+        cb(null,'./static/images/restaurants');
     },
     filename:(req,file,cb) => {
-        cb(null,file.originalname);
+        try {
+            cb(null,req.body.email+path.extname(file.originalname));
+        }
+        catch(err){ 
+            console.error(err);
+        }
+        
+    }
+});
+const menuItemStorage = multer.diskStorage({
+    destination: (req,file,cb) => {
+        cb(null,'./static/images/restaurants');
+    },
+    filename:(req,file,cb) => {
+        try {
+            cb(null,req.body.id+req.body.item+path.extname(file.originalname));
+        }
+        catch(err){ 
+            console.error(err);
+        }
+        
     }
 });
 const upload = multer({storage:storage});
+const uploadMenuItem = multer({storage:menuItemStorage});
 
 var { check, validationResult } = require('express-validator');
 /**
@@ -26,10 +48,10 @@ var { check, validationResult } = require('express-validator');
  */
 router.post('/create-restaurant',upload.single('profileImg'),[
     check('name','Please Enter your Name').not().isEmpty(),
+    check('owner','Please enter the name of owner').not().isEmpty(),
     check('email','Your email is valid. Please check the format of your email.').isEmail(),
     check('password','The length of the password must be 8 or more characters.').isLength({min:8}),
     check('contact','Please enter your contant number').not().isEmpty(),
-    check('contact','Please check the length of your contact number').isLength({min:10,max:10}),
     check('cuisine','Please enter the type of cuisine served at your restaurant').not().isEmpty()
     ],async (req,res)=>{
         
@@ -43,7 +65,7 @@ router.post('/create-restaurant',upload.single('profileImg'),[
        
        try{
             // Step 1 : De-Struct the request body 
-            const { email, name, password, contact, cuisine} = req.body;
+            const { email,owner, name, password, contact, cuisine} = req.body;
             let profileImg = "";
             // Step 2 : check for duplicate user
             let restaurant = await Restaurant.findOne({email});
@@ -51,13 +73,14 @@ router.post('/create-restaurant',upload.single('profileImg'),[
                return res.status(400).json({errors:[{msg:'User already exist'}]})
             }
             if(req.file != null){
+                
+                // File size limit is 5 Mb
                 if(req.file.size > 5242880){
                     return res.status(400).json({errors:[{msg:'The image size should be smaller than or equal to 5 MB.'}]});
                 }   
-                console.
-                profileImg = req.file.path1;
+                profileImg = req.file.path;
             }
-            restaurant = new Restaurant({name,email,password,contact,cuisine,profileImg});
+            restaurant = new Restaurant({name,owner,email,password,contact,cuisine,profileImg});
             
             // Step 3 : Encrpyt password
             const salt = await bcrpyt.genSalt(10);
@@ -81,11 +104,12 @@ router.post('/create-restaurant',upload.single('profileImg'),[
                     if(err){
                         throw err;
                     }
-                    res.json({token})
+                    res.json({token,user:restaurant})
                 }); 
 
        }catch(err){
-            res.status(500).send(err);
+           console.error(err);
+           res.status(500).send("Server Error!");
        }     
 });
 
@@ -95,10 +119,33 @@ router.post('/create-restaurant',upload.single('profileImg'),[
  */
 router.get('/view-restaurants',async (req,res)=>{
     try{
-        let restaurantList = await Restaurant.find({});
-        res.json(restaurantList);
+        console.log(req.query);
+        if(req.query.name!= null && req.query.cuisine != null){
+            let restaurantList = await Restaurant.find({
+                name: req.query.name,
+                cuisine: req.query.cuisine
+            });
+            res.json(restaurantList);
+        }
+        else if(req.query.name != null){
+            let restaurantList = await Restaurant.find({
+                name:req.query.name
+            });
+            res.json(restaurantList);
+        }
+        else if(req.query.cuisine != null){
+            let restaurantList = await Restaurant.find({
+                cuisine:req.query.cuisine
+            });
+            res.json(restaurantList);
+        }        
+        else{
+            let restaurantList = await Restaurant.find({});
+            res.json(restaurantList);
+        }
+        
     }catch(err){
-        res.status(500).send("Server Error from /view-restaurants"+err);
+        res.status(500).send("Server Error from /view-restaurants");
     }
 });
 
@@ -106,26 +153,78 @@ router.get('/view-restaurants',async (req,res)=>{
  * @description This Api will get all the details of the user
  * 
  */
-router.get('/:restId',auth, async(req,res)=>{
-    //try{
-        //console.log(req.params.customerId);
-        const restId = req.params.customerId;
-        let restaurant = await Restaurant.findById(restId);
+router.get('/:restId', async(req,res)=>{
+    try{
         
+        const restId = req.params.restId;
+        let restaurant = await Restaurant.findById(restId);
+         
         if(restaurant){
             return res.json({restaurant});
         }
         else{
-             return res.json({msg:"No Restuarant Found"});
-        }
-        
-    //}catch(err){
-        
-     //   res.status(500).send("Error with Server!" + JSON.stringify(err));
-   // }
-
-
+            return res.json({msg:"No Restuarant Found"});
+        }   
+    }catch(err){
+        res.status(500).send("Error with Server!" + JSON.stringify(err));
+    }
 });
 
+router.get('/:restId/profileImg',async(req,res)=>{
+    try{
+        const restId = req.params.restId;
+        let restaurant = await Restaurant.findById(restId);
+        let imagePath = path.resolve(".")+"\\"+restaurant.profileImg;
+        res.sendFile(imagePath);
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+             
+});
+
+router.get('/:restId/menu',async(req,res)=>{
+    try{
+        let restaurant = await Restaurant.findById(req.params.restId);
+        
+        console.log(restaurant.menu);
+        
+        res.json(restaurant.menu);
+    }catch(err){
+        console.error(err);
+        res.status(500).send("server Error!");
+    }
+});
+
+router.post('/:restId/addmenu',upload.single('img'),
+[
+    check('item','Please enter name of dish').not().isEmpty(),
+    check('price','Enter the price').isEmpty(),
+    check('price','The price should be number').not().isNumeric(),
+    check('section','Please Enter the section').not().isEmpty(),
+    ]
+,async(req,res)=>{
+ try{
+    
+    let {item, desc, price, section, img } = req.body;
+    let id = req.params.restId;
+    let restaurant = await Restaurant.findById(id);
+    
+    if(req.file != null){           
+        // File size limit is 5 Mb
+        if(req.file.size > 5242880){
+            return res.status(400).json({errors:[{msg:'The image size should be smaller than or equal to 5 MB.'}]});
+        }   
+        let img = req.file.path;
+    }
+    restaurant.menu.push({item,desc,price,section,img});
+    restaurant.save();
+    res.status(200);     
+ }catch(err){
+     console.error(err);
+     res.status(500).send("Server Error");
+ }
+});
 
 module.exports = router;

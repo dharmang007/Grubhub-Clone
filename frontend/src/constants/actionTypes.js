@@ -9,6 +9,7 @@ export class UserActionConstants{
     static USER_LOGIN_FAIL = "USER_LOGIN_FAIL";
     static USER_LOAD = "USER_LOAD";
     static USER_AUTH_FAIL = "USER_AUTH_FAILED";
+    static USER_LOGOUT = "USER_LOGOUT";
     
 }
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 import cookie from 'react-cookies';
+import store from '../../stores';
 import { Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
 
 export default class RestaurantNavbar extends React.Component {
@@ -8,7 +9,8 @@ export default class RestaurantNavbar extends React.Component {
     super();
     this.toggle = this.toggle.bind(this);
     this.state = {
-      isOpen: false
+      isOpen: false,
+      authStatus:false
     };
   }
   toggle() {
@@ -16,14 +18,15 @@ export default class RestaurantNavbar extends React.Component {
       isOpen: !this.state.isOpen
     });
   }
+
   handleLogout = () => {
-    cookie.remove('restaurantId', { path: '/' })
-}
+      localStorage.clear();
+  } 
   render() {
 
     let navLogin = null;
     
-      if(cookie.load('restaurantId')){
+      if(localStorage.token){
           navLogin = (
               <Link to="/" onClick = {this.handleLogout}>Logout</Link>
           );

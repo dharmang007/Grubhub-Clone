@@ -14,6 +14,10 @@ const RestaurantSchema = new mongoose.Schema({
     type: String,
     required: true
     },
+  owner:{
+    type:String,
+    require:true
+  },
   email:{
     type: String,
     required: true,
@@ -39,7 +43,8 @@ const RestaurantSchema = new mongoose.Schema({
           item:{type:String,required:true},
           desc:{type:String},
           price:{type:Number,required:true},
-          section:{type:String,required:true}
+          section:{type:String,required:true},
+          img:{type:String}
         }
        ]
 });

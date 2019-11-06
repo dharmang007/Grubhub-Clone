@@ -24,8 +24,11 @@ app.use(express.json(
 
 
 app.use(function(req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    //res.setHeader('Access-Control-Allow-Origin', 'ec2-174-129-60-212.compute-1.amazonaws.com:3000');
+    res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
+    
     res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers,X-Access-Token,XKey,Authorization');
     next();
@@ -42,7 +45,6 @@ connectToDataBase();
 app.use('/api/customers',require('./routes/api/customers'));
 app.use('/api/restaurants',require('./routes/api/restaurants'));
 app.use('/api/auth',require('./routes/api/auth'));
-app.use('/api/profile',require('./routes/api/profile'));
 app.use('/api/orders',require('./routes/api/orders'));
 /*#endregion*/
 

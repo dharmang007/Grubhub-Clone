@@ -31,6 +31,7 @@ const connectToDatabase = async () => {
         // mongoose.connect() returns a promise so we need to put the await keyword
         await mongoose.connect(db,dbOptions);
         console.log('Database Connected!')
+        
     }catch(error){
         console.log('Database connection failed!');
         process.exit(1);

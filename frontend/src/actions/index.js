@@ -3,6 +3,7 @@ import {UserActionConstants} from '../constants/actionTypes';
 export default{
     
     userLoginPass: (payload) => {
+        console.log("Payload from Action::"+JSON.stringify(payload));
         return {
             type : UserActionConstants.USER_LOGIN_PASS,
             payload : payload    

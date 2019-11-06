@@ -17,20 +17,20 @@ export default class GeneralNavbar extends React.Component {
       isOpen: !this.state.isOpen
     });
   }
+  
   handleLogout = () => {
-    cookie.remove('cookie', { path: '/' })
-
+      localStorage.clear();
   }
   render() {
 
     let navLogin = null;
-    
-      if(cookie.load('cookie')){
+        
+      if(localStorage.token){
           navLogin = (
               <Link to="/" onClick = {this.handleLogout}>Logout</Link>
           );
-      }else{
-          navLogin = (
+      }else{  
+        navLogin = (
               <Link to="/login"> Login</Link>
           )
       }

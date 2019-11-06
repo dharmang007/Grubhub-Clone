@@ -22,18 +22,14 @@ const userType = {
  */
 router.get('/',auth, async (req,res)=>{
     try{
-        
         // returns all information except the password
-        console.log(req.body.userType);
         if(req.body.userType == userType.customer){
-            console.log("Customer is returned");
             const customer = await Customer.findById(req.customer.id).select('-password');
             res.json(customer);
         }
         else{
-            console.log("Restaurant is returned");
-             const restaurant = await Restaurant.findById(req.restaurant.id).select('-password');
-             res.json(restaurant);
+            const restaurant = await Restaurant.findById(req.restaurant.id).select('-password');
+            res.json(restaurant);
         }
     }
     catch(err){
@@ -45,16 +41,14 @@ router.get('/',auth, async (req,res)=>{
 /**
  * @description This API will be used for login of Customer and Restaurant
  */
-router.post('/',[
+router.post('/login',[
     check('email','Please Enter your Email').not().isEmpty(),
     check('email','Your email is valid. Please check the format of your email.').isEmail(),
     check('password','Please password your Email').not().isEmpty(),
     ],
     async (req,res)=>{
-    
        const err = validationResult(req);    
        if(!err.isEmpty()){
-           
         return res.status(400).json({
             errors:err.array()
         });
@@ -64,10 +58,13 @@ router.post('/',[
             // Step 1 : De-Struct the request body 
             const {userType, email, password } = req.body;
             // Step 2 : check for duplicate user
-            if(userType== userType.Customer){
+            if(userType == "Customer"){     
+                console.log("User is Customer");   
                 authCustomer(email,password,req,res);
             }
             else{
+                console.log("User is Restaurant");
+                console.log(userType);
                 authRestaurant(email,password,req,res);
             }
                 
@@ -80,10 +77,10 @@ router.post('/',[
        
 });
 
-let authCustomer = (email,password,req,res) => {
+let authCustomer = async (email,password,req,res) => {
+    
     let customer = await Customer.findOne({email});
-    if(!customer){1
-       
+    if(!customer){
         return res.status(400).json({errors:[{msg:'Invalid Credentials'}]});
     }
 
@@ -113,7 +110,7 @@ let authCustomer = (email,password,req,res) => {
     });
 } 
 
-let authRestaurant = (email,password,req,res) =>{
+let authRestaurant = async (email,password,req,res) =>{
     let restaurant = await Restaurant.findOne({email});
     if(!restaurant){
         
