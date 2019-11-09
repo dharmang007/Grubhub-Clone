@@ -10,8 +10,6 @@ const mongoose = require('mongoose');
  *  
  * */
 const CustomerSchema = new mongoose.Schema({
-
- 
   email:{
     type: String,
     required: true,
@@ -31,7 +29,15 @@ const CustomerSchema = new mongoose.Schema({
   },
   profileImg:{
     type:String
-  }
+  },
+  cart:[
+    {
+      restId:{type:mongoose.Schema.Types.ObjectId,required:true},
+      itemId:{type:mongoose.Schema.Types.ObjectId,required:true},
+      qty:{type:Number,required:true}
+    }
+  ]
+
 });
 
 //Here the mongoose.model has two arguments 

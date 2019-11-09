@@ -2,11 +2,13 @@ import React, { Component } from "react";
 import "../login.css";
 import {Redirect} from 'react-router';
 import axios from 'axios';
-import {Button, Form, FormText, FormGroup,Label, Input} from'reactstrap';
 import GeneralNavbar from "../navbar";
 import actions from "../../actions";
 import {connect} from "react-redux";
 import defaultValues from "../../constants/defaultValues";
+import { Col,Row,Form,FormText, FormGroup,Label, Input, Card, Button,CardTitle, CardText, 
+    CardSubtitle, CardBody, Pagination, PaginationItem, PaginationLink,ButtonGroup
+} from 'reactstrap';
 export default class AddMenu extends Component{    
         
     constructor(props){
@@ -17,8 +19,10 @@ export default class AddMenu extends Component{
             price:null,
             section:null,
             img:null,
+            menu:[],
             itemList : [],
-            restid : localStorage.id
+
+            restid : localStorage.userid
         };
         this.onItemChangeEvent = this.onItemChangeEvent.bind(this);
         this.onDescChangeEvent = this.onDescChangeEvent.bind(this);
@@ -26,6 +30,7 @@ export default class AddMenu extends Component{
         this.onSectionChangeEvent = this.onSectionChangeEvent.bind(this);
         this.onImgChangeEvent = this.onImgChangeEvent.bind(this);
         this.submitButtonEvent = this.submitButtonEvent.bind(this);
+        
         console.log(defaultValues.serverURI+'/api/restaurant/'+localStorage.userId+'/menu');
         
     }
@@ -35,7 +40,7 @@ export default class AddMenu extends Component{
         .then(async res => {
             console.log(res.data);
             this.setState({
-                itemList: res.data
+               menu : res.data
             })
         });
     }
@@ -102,8 +107,70 @@ export default class AddMenu extends Component{
             });
         });
     }
+
+    componentDidMount() {
+        if(localStorage.userId){
+
+            this.getMenuFromServer();
+            //this.getCartFromServer();      
+        }
+        
+        
+    }
+    getMenuFromServer(){
+        axios.get(defaultValues.serverURI+'/api/restaurants/'+this.state.restId+"/menu")
+        .then((response) => {
+        //update the state with the response data
+            if(response.status === 200){
+                this.setState({
+                    menu : response.data
+                })
+            }
+            
+        }).catch(err=>{
+          console.log(err); 
+        });
+    }
+    getMenuArray = (currentPage) =>{
+        let menu = this.state.menu;
+        menu = menu.slice(currentPage * this.pageSize,(currentPage + 1) * this.pageSize);
+        menu = menu.map((i,j) =>{
+            return(  
+              <Col sm={{ size: 'auto', offset: 1 }}>
+              <div  style={ { marginbottom:"10px" }}>
+                <div className="data-slice" key={j} >
+                    <Card className="menuItem">
+                        <CardBody>
+                            <div className='row'>
+                                <div id="itemImg" className='col-md-3'>
+                                    <img className="contain" alt = "No Image" src={defaultValues.serverURI+"/api/restaurants/"+i._id+"/profileImg"} width="200" height="100" />
+                                </div> 
+                                <div id="itemDetials" className='col-md-9'>
+                                    <CardTitle>{i.name}</CardTitle>
+                                    <CardSubtitle>Contant Number: {i.contact}</CardSubtitle>
+                                    <CardText>{i.desc}</CardText>
+                                    <CardText>Price : {i.price}</CardText>
+                                    <ButtonGroup>
+                                        <Button color='danger'>Remove</Button>
+                                        <p></p>
+                                        <Button color="success">Add</Button>
+                                    </ButtonGroup>
+                                </div>
+                            </div>
+                        </CardBody>
+                    </Card>
+                </div>
+              </div>
+                 </Col>
+            )
+        });
+        return menu;
+    }
     render(){    
       console.log(this.state.itemList);
+      const { currentPage } = this.state;
+      let menuItems = this.getMenuArray(currentPage);
+      
         return (
             <div>
                 <GeneralNavbar/>
@@ -142,6 +209,7 @@ export default class AddMenu extends Component{
                     </Form>
 
                     <h2> Menu </h2 >   
+
                     </div>
                 </div>            
             </div>

@@ -3,6 +3,7 @@
 const express = require('express');
 const Restaurant = require('../../models/Restaurant');
 const bcrpyt = require('bcryptjs');
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 const multer = require('multer');
@@ -170,33 +171,58 @@ router.get('/:restId', async(req,res)=>{
     }
 });
 
-router.get('/:restId/profileImg',async(req,res)=>{
-    try{
-        const restId = req.params.restId;
-        let restaurant = await Restaurant.findById(restId);
-        let imagePath = path.resolve(".")+"\\"+restaurant.profileImg;
-        res.sendFile(imagePath);
-    }
-    catch(err){
-        console.error(err);
-        res.status(500).send("Server Error");
-    }
-             
-});
 
 router.get('/:restId/menu',async(req,res)=>{
     try{
-        let restaurant = await Restaurant.findById(req.params.restId);
-        
-        console.log(restaurant.menu);
-        
-        res.json(restaurant.menu);
+        let menu = await Restaurant.findById(req.params.restId).select('menu');     
+        res.json(menu.menu);
     }catch(err){
         console.error(err);
         res.status(500).send("server Error!");
     }
 });
 
+router.get('/:restId/menu/:itemId',async(req,res)=>{
+    try{
+        let menu = await Restaurant.findById(req.params.restId).select('menu')
+        let item = menu.menu.filter(item => item._id == req.params.itemId);
+        res.json(item);
+        
+    }catch(err){
+        console.error(err);
+        res.status(500).send("server Error!");
+    }
+});
+
+router.get('/:restId/orders',async(req,res)=>{
+    try{
+        let restaurant = await Restaurant.findById(req.params.restId).select('');     
+        res.json(restaurant.menu);
+    }catch(err){
+        console.error(err);
+        res.status(500).send("server Error!");
+    }
+});
+router.get('/:restId/profileImg',async(req,res)=>{
+    try{
+        
+        const restId = req.params.restId;
+        
+        let restaurant = await Restaurant.findById(restId);
+        if(restaurant.profileImg){
+            let imagePath = path.resolve(".")+"\\"+restaurant.profileImg;      
+            res.sendFile(imagePath);
+        }else{
+            res.send('No Image');
+        }
+        
+        
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).send("Server Error");
+   }     
+});
 router.post('/:restId/addmenu',upload.single('img'),
 [
     check('item','Please enter name of dish').not().isEmpty(),

@@ -3,7 +3,6 @@ import {UserActionConstants} from '../constants/actionTypes';
 export default{
     
     userLoginPass: (payload) => {
-        console.log("Payload from Action::"+JSON.stringify(payload));
         return {
             type : UserActionConstants.USER_LOGIN_PASS,
             payload : payload    
@@ -25,6 +24,18 @@ export default{
         return {
             type: UserActionConstants.USER_AUTH_FAIL
         }
+    },
+
+    addToCart: (payload) => {
+        return {
+            type: UserActionConstants.ADD_TO_CART,
+            payload: payload
+        }
+    },
+    removeFromCart: (payload) =>{
+        return {
+            type: UserActionConstants.REMOVE_FROM_CART,
+            payload:payload
+        }
     }
-   
 }  

@@ -22,7 +22,7 @@ class Home extends Component{
         if(localStorage.token)
         {
             setToken(localStorage.token);
-            console.log(axios.defaults.headers);
+            
             if(localStorage.userId){
                 axios.get(defaultValues.serverURI+"/api/customers/"+localStorage.userId)
                 .then(res =>{
@@ -46,7 +46,10 @@ class Home extends Component{
                     <GeneralNavbar/>
                     
                     <h3>Welcome  {this.state.user.name}</h3>      
-                                
+                    <div className="row">                        
+                        <img className="contain" src={defaultValues.serverURI+"/api/customers/"+this.state.user._id+"/profileImg"} />
+                        <p>{defaultValues.serverURI+"/api/customers/"+this.state.user._id+"/profileImg"}</p>
+                    </div>         
                     <div className="row">
                         <div className="col-md-6"><p></p></div>
                         <div className="col-md-6"><p> </p></div>

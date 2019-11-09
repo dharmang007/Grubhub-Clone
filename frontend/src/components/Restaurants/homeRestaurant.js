@@ -37,6 +37,7 @@ export default class HomeRestaurant extends Component{
         let nextRedirect = null;
         return(    
                 <div>
+                    <RestaurantNavbar/>
                     <Button color="danger" onClick={this.SeeOrders()} block> Check Orders </Button>
                     <Button color="danger" onClick={this.CheckMenu()} block> Check Menu </Button>
                     <h3>Home Page </h3>

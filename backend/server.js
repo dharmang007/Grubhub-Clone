@@ -10,7 +10,7 @@ var express = require('express');
 var session = require('express-session');
 const connectToDataBase = require("./config/db");
 var cookieParser = require('cookie-parser');
-
+var cors = require('cors');
 /* #endregion*/
 
 /*#region Congigure Express app */
@@ -21,11 +21,13 @@ app.use(express.json(
         extends:false
     }));
 //app.use(bodyParser.json());
-
+//use cors to allow cross origin resource sharing
+//app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: 'ec2-100-26-190-178.compute-1.amazonaws.com:3000', credentials: true }));
 
 app.use(function(req, res, next) {
-    //res.setHeader('Access-Control-Allow-Origin', 'ec2-174-129-60-212.compute-1.amazonaws.com:3000');
-    res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
+    res.setHeader('Access-Control-Allow-Origin', 'ec2-100-26-190-178.compute-1.amazonaws.com:3000');
+    //res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
     
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     
@@ -45,7 +47,7 @@ connectToDataBase();
 app.use('/api/customers',require('./routes/api/customers'));
 app.use('/api/restaurants',require('./routes/api/restaurants'));
 app.use('/api/auth',require('./routes/api/auth'));
-app.use('/api/orders',require('./routes/api/orders'));
+
 /*#endregion*/
 
 app.listen(process.env.PORT||port, () =>{

@@ -5,7 +5,7 @@ import Home from './Customers/home';
 import SignUpRestaurant from './Restaurants/signUpRestaurant';
 import SignUpUser from './Customers/signUpUser';
 import CustomerOrders from './Customers/CustomerOrders';
-import ViewResturants from './Customers/viewRestaurants';
+import ViewResturants from './Restaurants/viewRestaurants';
 import RestaurantProfile from './Restaurants/restaurantProfile';
 import HomeRestaurant from './Restaurants/homeRestaurant';
 import SeeOrders from './Restaurants/seeOrders';
@@ -25,10 +25,10 @@ class Main extends Component {
                     <Route path="/customer/my-orders" component={CustomerOrders}/>
                     <Route path="/restaurant/see-orders" component={HomeRestaurant}/>
                     <Route path="/restaurant/add-menu" component={AddMenu}/>
-                    <Route path="/restaurantProfile" component={RestaurantProfile}/>
+                    <Route path="/restaurantProfile/:restId" component={RestaurantProfile}/>
                     <Route path="/home-restaurant" component={HomeRestaurant}/>
                     <Route path="/view-restaurants" component={ViewResturants}/>
-                    <Route path="/see-orders" component={SeeOrders}/>
+                    <Route path="/seeOrders" component={SeeOrders}/>
                     <Route path="/login" component={Login}/>
                     <Route path="/" component={Default}/>
                     </Switch>

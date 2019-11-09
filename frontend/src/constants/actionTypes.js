@@ -10,6 +10,8 @@ export class UserActionConstants{
     static USER_LOAD = "USER_LOAD";
     static USER_AUTH_FAIL = "USER_AUTH_FAILED";
     static USER_LOGOUT = "USER_LOGOUT";
+    static ADD_TO_CART = "ADD_TO_CART";
+    static REMOVE_FROM_CART = "REMOVE_FROM_CART";
     
 }
 

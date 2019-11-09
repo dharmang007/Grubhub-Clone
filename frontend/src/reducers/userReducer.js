@@ -5,14 +5,13 @@ var initialState = {
     token : localStorage.getItem('token'),
     isLoggedIn : null,
     loading: true,
-    user:null
+    user:null,
+    cart:null
 }
 export default (state=initialState, action) => {
 
     switch(action.type){
-        case UserActionConstants.USER_LOGIN_PASS:
-            console.log("From Reducer"); 
-            
+        case UserActionConstants.USER_LOGIN_PASS: 
             localStorage.setItem('token',action.payload.token);
             localStorage.setItem('userId',action.payload.user._id);
             localStorage.setItem('email',action.payload.user.email);
@@ -42,6 +41,10 @@ export default (state=initialState, action) => {
                 loading:false,
                 user:action.payload
             }
+//        case UserActionConstants.ADD_TO_CART:
+  //          let newState = Object.assign({},state);
+ 
+
         default:
             return state;
             

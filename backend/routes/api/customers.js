@@ -6,7 +6,6 @@
 /* #region Import Statements */
 const express = require('express');
 const Customer = require('../../models/Customer');
-const Orders = require('../../models/CustomerOrders');
 const bcrpyt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -14,8 +13,11 @@ const multer = require('multer');
 const auth = require('../../middleware/auth');
 const path = require('path');
 var { check, validationResult } = require('express-validator');
+
 /*#endregion*/ 
 
+
+//Using Multer object to save the Image Files
 const router = express.Router();
 const storage = multer.diskStorage({
     destination: (req,file,cb) => {
@@ -32,8 +34,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({storage:storage});
 
+
+
 /**
- * @description This API will create a new Customer profile. In case if user enters the invalid details, we will send the 400 Bad Request along with the error messages
+ * @description This API will create a new Customer profile. 
+ * In case if user enters the invalid details, we will send the 400 Bad Request along with the error messages
  */
 router.post('/create-user',upload.single('profileImg'),[
     check('name','Please Enter your Name').not().isEmpty(),
@@ -105,11 +110,14 @@ router.post('/create-user',upload.single('profileImg'),[
        
 });
 
+/**
+ * @description This method gets the customer details
+ */
 router.get('/:customerId',auth,async(req,res)=>{
     try{
         const customerId = req.params.customerId;
         
-        let customer = await Customer.findById(customerId);
+        let customer = await Customer.findById(customerId).select("-password");
         if(customer)
         {
             res.json(customer)
@@ -123,7 +131,11 @@ router.get('/:customerId',auth,async(req,res)=>{
         res.status(500).send("server error");
     }
 });
-router.get('/:customerId/profileImg',auth,async(req,res)=>{
+
+/**
+ * @description This gets the Profil Image of Customer
+ */
+router.get('/:customerId/profileImg',async(req,res)=>{
     try{
         const customerId = req.params.customerId;
         
@@ -140,38 +152,12 @@ router.get('/:customerId/profileImg',auth,async(req,res)=>{
 });
 
 /**
- * @description This Api will get all the details of the user
- * 
- */
-router.get('/:customerId', async(req,res)=>{
-    try{
-        const customerId = req.params.customerId;
-        let customer = await Customer.findById(customerId);
-        let profileImgPath = customer.profileImg;
-        if(customer){
-            return res.json({customer});
-        }
-        else{
-             return res.json({msg:"No Customer Found"});
-        }
-        
-    }catch(err){
-        
-        console.error(err.message);
-        res.status(500).send("Error with Server!");
-    }
-
-
-});
-
-
-
-/**
  * @description  This API will Query to get customer's orders 
  */
 router.get('/:customerId/orders',async (req,res)=>{
     try{
         const customerId = req.params.customerId;
+        const restId = req.params.restId;
         const orders = await Orders.findOne({customerId});
         if(orders){
             return res.json({orders});
@@ -185,5 +171,7 @@ router.get('/:customerId/orders',async (req,res)=>{
         res.status(500).send("Sever Error !");
     }
 });
+
+
 
 module.exports = router;

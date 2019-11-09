@@ -10,7 +10,7 @@ export default class RestaurantNavbar extends React.Component {
     this.toggle = this.toggle.bind(this);
     this.state = {
       isOpen: false,
-      authStatus:false
+      
     };
   }
   toggle() {
@@ -43,7 +43,7 @@ export default class RestaurantNavbar extends React.Component {
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
               <NavItem>
-                <Link to="#">Edit Profile</Link>
+                <Link to="/seeOrders">See Orders</Link>
               </NavItem>
               <NavItem>
                 <NavLink>{navLogin}</NavLink>
