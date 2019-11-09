@@ -23,10 +23,10 @@ app.use(express.json(
 //app.use(bodyParser.json());
 //use cors to allow cross origin resource sharing
 //app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
-app.use(cors({ origin: 'ec2-100-26-190-178.compute-1.amazonaws.com:3000', credentials: true }));
+app.use(cors({ origin: '100-26-190-178:3000', credentials: true }));
 
 app.use(function(req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'ec2-100-26-190-178.compute-1.amazonaws.com:3000');
+    res.setHeader('Access-Control-Allow-Origin', '100-26-190-178:3000');
     //res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
     
     res.setHeader('Access-Control-Allow-Credentials', 'true');
